@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"net"
 	"strconv"
 
 	"github.com/mitchellh/mapstructure"
@@ -39,7 +40,9 @@ func NnrfNFManagementDataModel(nf *models.NrfNfManagementNfProfile, nfprofile *m
 	}
 
 	nnrfNFManagementCondition(nf, nfprofile)
-	nnrfNFManagementOption(nf, nfprofile)
+	if err := nnrfNFManagementOption(nf, nfprofile); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -99,7 +102,7 @@ func nnrfNFManagementCondition(nf *models.NrfNfManagementNfProfile, nfprofile *m
 	}
 }
 
-func nnrfNFManagementOption(nf *models.NrfNfManagementNfProfile, nfprofile *models.NrfNfManagementNfProfile) {
+func nnrfNFManagementOption(nf *models.NrfNfManagementNfProfile, nfprofile *models.NrfNfManagementNfProfile) error {
 	// sNssais
 	if nfprofile.SNssais != nil {
 		// fmt.Println("SNssais")
@@ -342,6 +345,16 @@ func nnrfNFManagementOption(nf *models.NrfNfManagementNfProfile, nfprofile *mode
 		if nfprofile.BsfInfo.Ipv6PrefixRanges != nil {
 			Ipv6Range := make([]models.NrfNfManagementIpv6PrefixRange, len(nfprofile.BsfInfo.Ipv6PrefixRanges))
 			for i := 0; i < len(nfprofile.BsfInfo.Ipv6PrefixRanges); i++ {
+				startIP := net.ParseIP(nfprofile.BsfInfo.Ipv6PrefixRanges[i].Start)
+				if startIP == nil {
+					return fmt.Errorf("invalid IPv6 prefix range start: %q",
+						nfprofile.BsfInfo.Ipv6PrefixRanges[i].Start)
+				}
+				endIP := net.ParseIP(nfprofile.BsfInfo.Ipv6PrefixRanges[i].End)
+				if endIP == nil {
+					return fmt.Errorf("invalid IPv6 prefix range end: %q",
+						nfprofile.BsfInfo.Ipv6PrefixRanges[i].End)
+				}
 				Ipv6Range[i].Start = Ipv6ToInt(nfprofile.BsfInfo.Ipv6PrefixRanges[i].Start).String()
 				Ipv6Range[i].End = Ipv6ToInt(nfprofile.BsfInfo.Ipv6PrefixRanges[i].End).String()
 			}
@@ -394,6 +407,7 @@ func nnrfNFManagementOption(nf *models.NrfNfManagementNfProfile, nfprofile *mode
 		nf.CustomInfo = make(map[string]interface{})
 	}
 	nf.CustomInfo["oauth2"] = factory.NrfConfig.GetOAuth()
+	return nil
 }
 
 func GetNfInstanceURI(nfInstID string) string {
@@ -449,7 +463,12 @@ func SetLocationHeader(nfprofile *models.NrfNfManagementNfProfile) string {
 	return locationHeader[0]
 }
 
-func setUriListByFilter(filter bson.M, uriList *[]string) {
+type NotificationTarget struct {
+	Uri      string
+	TargetNf models.NrfNfManagementNfType
+}
+
+func setUriListByFilter(filter bson.M, uriList *[]NotificationTarget) {
 	filterNfTypeResultsRaw, err := mongoapi.RestfulAPIGetMany("Subscriptions", filter)
 	if err != nil {
 		logger.NfmLog.Errorf("setUriListByFilter err: %+v", err)
@@ -461,7 +480,10 @@ func setUriListByFilter(filter bson.M, uriList *[]string) {
 	}
 
 	for _, subscr := range filterNfTypeResults {
-		*uriList = append(*uriList, subscr.NfStatusNotificationUri)
+		*uriList = append(*uriList, NotificationTarget{
+			Uri:      subscr.NfStatusNotificationUri,
+			TargetNf: subscr.ReqNfType,
+		})
 	}
 }
 
@@ -500,8 +522,8 @@ func nnrfUriList(originalUL *UriList, ul *UriList, location []string) {
 	ul.Link = *links
 }
 
-func GetNofificationUri(nfProfile *models.NrfNfManagementNfProfile) []string {
-	var uriList []string
+func GetNofificationUri(nfProfile *models.NrfNfManagementNfProfile) []NotificationTarget {
+	var uriList []NotificationTarget
 
 	// nfTypeCond
 	nfTypeCond := bson.M{
