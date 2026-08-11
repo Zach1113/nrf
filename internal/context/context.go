@@ -24,7 +24,7 @@ import (
 )
 
 type NRFContext struct {
-	NrfNfProfile     models.NrfNfManagementNfProfile
+	NrfNfProfile     models.Nrf_NFMgmt_NFProfile
 	Nrf_NfInstanceID string
 	RootPrivKey      *rsa.PrivateKey
 	RootCert         *x509.Certificate
@@ -40,7 +40,7 @@ const (
 )
 
 type NFContext interface {
-	AuthorizationCheck(token string, serviceName models.ServiceName) error
+	AuthorizationCheck(token string, serviceName models.Nrf_NFMgmt_ServiceName) error
 }
 
 var _ NFContext = &NRFContext{}
@@ -54,8 +54,8 @@ func InitNrfContext() error {
 	configuration := config.Configuration
 
 	nrfContext.NrfNfProfile.NfInstanceId = config.GetNfInstanceId()
-	nrfContext.NrfNfProfile.NfType = models.NrfNfManagementNfType_NRF
-	nrfContext.NrfNfProfile.NfStatus = models.NrfNfManagementNfStatus_REGISTERED
+	nrfContext.NrfNfProfile.NfType = models.Nrf_NFMgmt_NFType_NRF
+	nrfContext.NrfNfProfile.NfStatus = models.Nrf_NFMgmt_NFStatus_REGISTERED
 	nrfContext.NfRegistNum = 0
 
 	serviceNameList := configuration.ServiceNameList
@@ -116,28 +116,28 @@ func InitNrfContext() error {
 	return nil
 }
 
-func InitNFService(srvNameList []string, version string) []models.NrfNfManagementNfService {
+func InitNFService(srvNameList []string, version string) []models.Nrf_NFMgmt_NFService {
 	tmpVersion := strings.Split(version, ".")
 	versionUri := "v" + tmpVersion[0]
-	NFServices := make([]models.NrfNfManagementNfService, len(srvNameList))
+	NFServices := make([]models.Nrf_NFMgmt_NFService, len(srvNameList))
 	for index, nameString := range srvNameList {
-		name := models.ServiceName(nameString)
-		NFServices[index] = models.NrfNfManagementNfService{
+		name := models.Nrf_NFMgmt_ServiceName(nameString)
+		NFServices[index] = models.Nrf_NFMgmt_NFService{
 			ServiceInstanceId: strconv.Itoa(index),
 			ServiceName:       name,
-			Versions: []models.NfServiceVersion{
+			Versions: []models.Nrf_NFMgmt_NFServiceVersion{
 				{
 					ApiFullVersion:  version,
 					ApiVersionInUri: versionUri,
 				},
 			},
 			Scheme:          models.UriScheme(factory.NrfConfig.GetSbiScheme()),
-			NfServiceStatus: models.NfServiceStatus_REGISTERED,
+			NfServiceStatus: models.Nrf_NFMgmt_NFServiceStatus_REGISTERED,
 			ApiPrefix:       factory.NrfConfig.GetSbiUri(),
-			IpEndPoints: []models.IpEndPoint{
+			IpEndPoints: []models.Nrf_NFMgmt_IpEndPoint{
 				{
 					Ipv4Address: factory.NrfConfig.GetSbiRegisterIP(),
-					Transport:   models.NrfNfManagementTransportProtocol_TCP,
+					Transport:   models.Nrf_NFMgmt_TransportProtocol_TCP,
 					Port:        int32(factory.NrfConfig.GetSbiPort()),
 				},
 			},
@@ -208,7 +208,7 @@ func GetSelf() *NRFContext {
 	return &nrfContext
 }
 
-func (context *NRFContext) AuthorizationCheck(token string, serviceName models.ServiceName) error {
+func (context *NRFContext) AuthorizationCheck(token string, serviceName models.Nrf_NFMgmt_ServiceName) error {
 	if !factory.NrfConfig.GetOAuth() {
 		return nil
 	}
@@ -222,7 +222,7 @@ func (context *NRFContext) AuthorizationCheck(token string, serviceName models.S
 
 // NRF is the token authority, so it signs tokens directly using its own private key.
 func (ctx *NRFContext) GetTokenCtx(
-	serviceName models.ServiceName, targetNF models.NrfNfManagementNfType,
+	serviceName models.Nrf_NFMgmt_ServiceName, targetNF models.Nrf_NFMgmt_NFType,
 ) (context.Context, *models.ProblemDetails, error) {
 	if !factory.NrfConfig.GetOAuth() {
 		return context.TODO(), nil, nil
@@ -235,7 +235,7 @@ func (ctx *NRFContext) GetTokenCtx(
 	var expiration int32 = 1000
 	now := int32(time.Now().Unix())
 
-	claims := models.AccessTokenClaims{
+	claims := models.Nrf_AccTok_AccessTokenClaims{
 		Iss:   ctx.NrfNfProfile.NfInstanceId,
 		Sub:   ctx.NrfNfProfile.NfInstanceId,
 		Aud:   targetNF,

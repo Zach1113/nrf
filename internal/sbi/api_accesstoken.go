@@ -55,7 +55,7 @@ func (s *Server) HTTPAccessTokenRequest(c *gin.Context) {
 		return
 	}
 
-	var accessTokenReq models.NrfAccessTokenAccessTokenReq
+	var accessTokenReq models.Nrf_AccTok_AccessTokenReq
 
 	// Request parser
 	err := c.Request.ParseForm()

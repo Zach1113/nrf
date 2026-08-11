@@ -9,6 +9,6 @@ import (
 )
 
 type UriList struct {
-	NfType models.NrfNfManagementNfType `json:"nfType,omitempty" bson:"nfType,omitempty"`
-	Link   Links                        `json:"_link" bson:"_link" mapstructure:"_link"`
+	NfType models.Nrf_NFMgmt_NFType `json:"nfType,omitempty" bson:"nfType,omitempty"`
+	Link   Links                    `json:"_link" bson:"_link" mapstructure:"_link"`
 }
