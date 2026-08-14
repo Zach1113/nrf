@@ -464,8 +464,9 @@ func SetLocationHeader(nfprofile *models.NrfNfManagementNfProfile) string {
 }
 
 type NotificationTarget struct {
-	Uri      string
-	TargetNf models.NrfNfManagementNfType
+	Uri                string
+	TargetNf           models.NrfNfManagementNfType
+	TargetNfInstanceID string
 }
 
 func setUriListByFilter(filter bson.M, uriList *[]NotificationTarget) {
@@ -481,8 +482,9 @@ func setUriListByFilter(filter bson.M, uriList *[]NotificationTarget) {
 
 	for _, subscr := range filterNfTypeResults {
 		*uriList = append(*uriList, NotificationTarget{
-			Uri:      subscr.NfStatusNotificationUri,
-			TargetNf: subscr.ReqNfType,
+			Uri:                subscr.NfStatusNotificationUri,
+			TargetNf:           subscr.ReqNfType,
+			TargetNfInstanceID: subscr.ReqNfInstanceId,
 		})
 	}
 }
