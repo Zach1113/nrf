@@ -317,7 +317,7 @@ func (p *Processor) NFDeregisterProcedure(nfInstanceID string) *models.ProblemDe
 		return problemDetails
 	}
 
-	uriList := nrf_context.GetNofificationUri(&nfProfiles[0])
+	uriList := nrf_context.GetNotificationUri(&nfProfiles[0])
 	nfInstanceType := nfProfiles[0].NfType
 	nfInstanceUri := nrf_context.GetNfInstanceURI(nfInstanceID)
 	// set info for NotificationData
@@ -485,7 +485,7 @@ func (p *Processor) UpdateNFInstanceProcedure(
 		}
 	}
 
-	uriList := nrf_context.GetNofificationUri(&nfProfiles[0])
+	uriList := nrf_context.GetNotificationUri(&nfProfiles[0])
 
 	// set info for NotificationData
 	Notification_event := models.NotificationEventType_PROFILE_CHANGED
@@ -653,7 +653,7 @@ func (p *Processor) NFRegisterProcedure(
 
 	if existed {
 		logger.NfmLog.Infoln("NFRegister NfProfile Update:", nfInstanceId)
-		uriList := nrf_context.GetNofificationUri(&nf)
+		uriList := nrf_context.GetNotificationUri(&nf)
 
 		// set info for NotificationData
 		Notification_event := models.NotificationEventType_PROFILE_CHANGED
@@ -679,7 +679,7 @@ func (p *Processor) NFRegisterProcedure(
 		return
 	} else { // Create NF Profile case
 		logger.NfmLog.Infoln("Create NF Profile:", nfInstanceId)
-		uriList := nrf_context.GetNofificationUri(&nf)
+		uriList := nrf_context.GetNotificationUri(&nf)
 		// set info for NotificationData
 		Notification_event := models.NotificationEventType_REGISTERED
 		nfInstanceUri := locationHeaderValue

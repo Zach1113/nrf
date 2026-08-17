@@ -522,24 +522,20 @@ func nnrfUriList(originalUL *UriList, ul *UriList, location []string) {
 	ul.Link = *links
 }
 
-func GetNofificationUri(nfProfile *models.NrfNfManagementNfProfile) []NotificationTarget {
-	var uriList []NotificationTarget
+func getNotificationFilters(nfProfile *models.NrfNfManagementNfProfile) []bson.M {
+	var filters []bson.M
 
 	// nfTypeCond
 	nfTypeCond := bson.M{
-		"subscrCond": bson.M{
-			"nfType": nfProfile.NfType,
-		},
+		"subscrCond.nfType": nfProfile.NfType,
 	}
-	setUriListByFilter(nfTypeCond, &uriList)
+	filters = append(filters, nfTypeCond)
 
 	// NfInstanceIdCond
 	nfInstanceIDCond := bson.M{
-		"subscrCond": bson.M{
-			"nfInstanceId": nfProfile.NfInstanceId,
-		},
+		"subscrCond.nfInstanceId": nfProfile.NfInstanceId,
 	}
-	setUriListByFilter(nfInstanceIDCond, &uriList)
+	filters = append(filters, nfInstanceIDCond)
 
 	// ServiceNameCond
 	if nfProfile.NfServices != nil {
@@ -553,18 +549,16 @@ func GetNofificationUri(nfProfile *models.NrfNfManagementNfProfile) []Notificati
 				"$in": serviceNames,
 			},
 		}
-		setUriListByFilter(ServiceNameCond, &uriList)
+		filters = append(filters, ServiceNameCond)
 	}
 
 	// AmfCond
 	if nfProfile.AmfInfo != nil {
 		amfCond := bson.M{
-			"subscrCond": bson.M{
-				"amfSetId":    nfProfile.AmfInfo.AmfSetId,
-				"amfRegionId": nfProfile.AmfInfo.AmfRegionId,
-			},
+			"subscrCond.amfSetId":    nfProfile.AmfInfo.AmfSetId,
+			"subscrCond.amfRegionId": nfProfile.AmfInfo.AmfRegionId,
 		}
-		setUriListByFilter(amfCond, &uriList)
+		filters = append(filters, amfCond)
 	}
 
 	// GuamiListCond
@@ -583,13 +577,14 @@ func GetNofificationUri(nfProfile *models.NrfNfManagementNfProfile) []Notificati
 					logger.NfmLog.Error(err)
 				}
 
-				guamiListBsonArray = append(guamiListBsonArray, bson.M{"subscrCond": bson.M{"$elemMatch": guamiMarshal}})
+				guamiListBsonArray = append(guamiListBsonArray,
+					bson.M{"subscrCond.guamiList": bson.M{"$elemMatch": guamiMarshal}})
 			}
 			guamiListFilter = bson.M{
 				"$or": guamiListBsonArray,
 			}
 		}
-		setUriListByFilter(guamiListFilter, &uriList)
+		filters = append(filters, guamiListFilter)
 	}
 
 	// NetworkSliceCond
@@ -607,7 +602,8 @@ func GetNofificationUri(nfProfile *models.NrfNfManagementNfProfile) []Notificati
 				logger.NfmLog.Error(err)
 			}
 
-			snssaisBsonArray = append(snssaisBsonArray, bson.M{"subscrCond": bson.M{"$elemMatch": snssaiMarshal}})
+			snssaisBsonArray = append(snssaisBsonArray,
+				bson.M{"subscrCond.snssaiList": bson.M{"$elemMatch": snssaiMarshal}})
 		}
 
 		var nsiListBsonArray bson.A
@@ -639,36 +635,38 @@ func GetNofificationUri(nfProfile *models.NrfNfManagementNfProfile) []Notificati
 				},
 			}
 		}
-		setUriListByFilter(networkSliceFilter, &uriList)
+		filters = append(filters, networkSliceFilter)
 	}
 
 	// NfGroupCond
 	if nfProfile.UdrInfo != nil {
 		nfGroupCond := bson.M{
-			"subscrCond": bson.M{
-				"nfType":    nfProfile.NfType,
-				"nfGroupId": nfProfile.UdrInfo.GroupId,
-			},
+			"subscrCond.nfType":    nfProfile.NfType,
+			"subscrCond.nfGroupId": nfProfile.UdrInfo.GroupId,
 		}
-		setUriListByFilter(nfGroupCond, &uriList)
+		filters = append(filters, nfGroupCond)
 	} else if nfProfile.UdmInfo != nil {
 		nfGroupCond := bson.M{
-			"subscrCond": bson.M{
-				"nfType":    nfProfile.NfType,
-				"nfGroupId": nfProfile.UdmInfo.GroupId,
-			},
+			"subscrCond.nfType":    nfProfile.NfType,
+			"subscrCond.nfGroupId": nfProfile.UdmInfo.GroupId,
 		}
-		setUriListByFilter(nfGroupCond, &uriList)
+		filters = append(filters, nfGroupCond)
 	} else if nfProfile.AusfInfo != nil {
 		nfGroupCond := bson.M{
-			"subscrCond": bson.M{
-				"nfType":    nfProfile.NfType,
-				"nfGroupId": nfProfile.AusfInfo.GroupId,
-			},
+			"subscrCond.nfType":    nfProfile.NfType,
+			"subscrCond.nfGroupId": nfProfile.AusfInfo.GroupId,
 		}
-		setUriListByFilter(nfGroupCond, &uriList)
+		filters = append(filters, nfGroupCond)
 	}
 
+	return filters
+}
+
+func GetNotificationUri(nfProfile *models.NrfNfManagementNfProfile) []NotificationTarget {
+	var uriList []NotificationTarget
+	for _, filter := range getNotificationFilters(nfProfile) {
+		setUriListByFilter(filter, &uriList)
+	}
 	return uriList
 }
 
