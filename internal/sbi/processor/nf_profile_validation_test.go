@@ -7,21 +7,21 @@ import (
 	"github.com/free5gc/openapi/models"
 )
 
-func validTestNfProfile() models.NrfNfManagementNfProfile {
-	return models.NrfNfManagementNfProfile{
+func validTestNfProfile() models.Nrf_NFMgmt_NFProfile {
+	return models.Nrf_NFMgmt_NFProfile{
 		NfInstanceId: "11111111-1111-4111-8111-111111111111",
-		NfType:       models.NrfNfManagementNfType_AMF,
-		NfStatus:     models.NrfNfManagementNfStatus_REGISTERED,
-		NfServices: []models.NrfNfManagementNfService{
+		NfType:       models.Nrf_NFMgmt_NFType_AMF,
+		NfStatus:     models.Nrf_NFMgmt_NFStatus_REGISTERED,
+		NfServices: []models.Nrf_NFMgmt_NFService{
 			{
 				ServiceInstanceId: "namf-comm",
-				ServiceName:       models.ServiceName_NAMF_COMM,
+				ServiceName:       models.Nrf_NFMgmt_ServiceName_NAMF_COMM,
 				Scheme:            models.UriScheme_HTTP,
-				NfServiceStatus:   models.NfServiceStatus_REGISTERED,
-				IpEndPoints: []models.IpEndPoint{
+				NfServiceStatus:   models.Nrf_NFMgmt_NFServiceStatus_REGISTERED,
+				IpEndPoints: []models.Nrf_NFMgmt_IpEndPoint{
 					{
 						Ipv4Address: "127.0.0.18",
-						Transport:   models.NrfNfManagementTransportProtocol_TCP,
+						Transport:   models.Nrf_NFMgmt_TransportProtocol_TCP,
 						Port:        8000,
 					},
 				},
@@ -30,7 +30,7 @@ func validTestNfProfile() models.NrfNfManagementNfProfile {
 	}
 }
 
-func validateTestProfile(t *testing.T, profile models.NrfNfManagementNfProfile) error {
+func validateTestProfile(t *testing.T, profile models.Nrf_NFMgmt_NFProfile) error {
 	t.Helper()
 	raw, err := json.Marshal(profile)
 	if err != nil {
@@ -65,7 +65,7 @@ func TestValidateNfProfileRejectsNonV4UUIDInstanceID(t *testing.T) {
 
 func TestValidateNfProfileRejectsInvalidNFStatus(t *testing.T) {
 	profile := validTestNfProfile()
-	profile.NfStatus = models.NrfNfManagementNfStatus("INVALID_STATUS")
+	profile.NfStatus = models.Nrf_NFMgmt_NFStatus("INVALID_STATUS")
 
 	if err := validateTestProfile(t, profile); err == nil {
 		t.Fatal("expected invalid nfStatus to be rejected")
@@ -74,7 +74,7 @@ func TestValidateNfProfileRejectsInvalidNFStatus(t *testing.T) {
 
 func TestValidateNfProfileRejectsInvalidNFType(t *testing.T) {
 	profile := validTestNfProfile()
-	profile.NfType = models.NrfNfManagementNfType("INVALID_TYPE")
+	profile.NfType = models.Nrf_NFMgmt_NFType("INVALID_TYPE")
 
 	if err := validateTestProfile(t, profile); err == nil {
 		t.Fatal("expected invalid nfType to be rejected")
