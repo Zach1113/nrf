@@ -10,6 +10,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	nrf_context "github.com/free5gc/nrf/internal/context"
 	"github.com/free5gc/nrf/internal/logger"
@@ -171,6 +173,18 @@ func (a *NrfApp) Start() {
 		factory.NrfConfig.Configuration.MongoDBUrl); err != nil {
 		logger.InitLog.Errorf("SetMongoDB failed: %+v", err)
 		return
+	}
+
+	// Discovery queries filter on amfInfo.guamiList via $elemMatch; without an index every
+	// call does a full collection scan. Indexing it also rules out full-collection-scan
+	// behavior as a variable in the intermittent NfProfile discovery misses tracked in
+	// doc/known-issue-nasreroute-multiamf-flakiness.md.
+	nfProfileColl := mongoapi.Client.Database(factory.NrfConfig.Configuration.MongoDBName).
+		Collection(nrf_context.NfProfileCollName)
+	if _, err := nfProfileColl.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.M{"amfInfo.guamiList": 1},
+	}); err != nil {
+		logger.InitLog.Errorf("Create index on amfInfo.guamiList failed: %+v", err)
 	}
 
 	logger.InitLog.Infoln("Server starting")
