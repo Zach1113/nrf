@@ -34,9 +34,9 @@ func (p *Processor) getNFNotifyCtx(target nrf_context.NotificationTarget) (conte
 	)
 	if target.TargetNfInstanceID != "" {
 		ctx, pd, err = nrf_context.GetSelf().GetTokenCtxForNFInstance(
-			models.ServiceName_NNRF_NFM, target.TargetNfInstanceID)
+			models.Nrf_NFMgmt_ServiceName_NNRF_NFM, target.TargetNfInstanceID)
 	} else {
-		ctx, pd, err = nrf_context.GetSelf().GetTokenCtx(models.ServiceName_NNRF_NFM, target.TargetNf)
+		ctx, pd, err = nrf_context.GetSelf().GetTokenCtx(models.Nrf_NFMgmt_ServiceName_NNRF_NFM, target.TargetNf)
 	}
 	if err != nil {
 		logger.NfmLog.Errorf("getNFNotifyCtx: token generation failed: %v", err)
@@ -72,7 +72,7 @@ func (p *Processor) HandleGetNFInstanceRequest(c *gin.Context, nfInstanceId stri
 
 func (p *Processor) HandleNFRegisterRequest(
 	c *gin.Context,
-	nfProfile *models.NrfNfManagementNfProfile,
+	nfProfile *models.Nrf_NFMgmt_NFProfile,
 	rawProfile []byte,
 ) {
 	logger.NfmLog.Infoln("Handle NFRegisterRequest")
@@ -141,7 +141,7 @@ func (p *Processor) HandleUpdateSubscriptionRequest(
 
 func (p *Processor) HandleCreateSubscriptionRequest(
 	c *gin.Context,
-	subscription models.NrfNfManagementSubscriptionData,
+	subscription models.Nrf_NFMgmt_SubscriptionData,
 ) {
 	logger.NfmLog.Infoln("Handle CreateSubscriptionRequest")
 
@@ -164,7 +164,7 @@ func (p *Processor) HandleCreateSubscriptionRequest(
 }
 
 func (p *Processor) CreateSubscriptionProcedure(
-	subscription models.NrfNfManagementSubscriptionData,
+	subscription models.Nrf_NFMgmt_SubscriptionData,
 ) (bson.M, *models.ProblemDetails) {
 	subscriptionID, err := nrf_context.SetsubscriptionId()
 	if err != nil {
@@ -306,7 +306,7 @@ func (p *Processor) NFDeregisterProcedure(nfInstanceID string) *models.ProblemDe
 	}
 
 	// nfProfile data for response
-	var nfProfiles []models.NrfNfManagementNfProfile
+	var nfProfiles []models.Nrf_NFMgmt_NFProfile
 	if err = timedecode.Decode(nfProfilesRaw, &nfProfiles); err != nil {
 		logger.NfmLog.Warnln("Time decode error: ", err)
 		problemDetails := &models.ProblemDetails{
@@ -327,11 +327,11 @@ func (p *Processor) NFDeregisterProcedure(nfInstanceID string) *models.ProblemDe
 		return problemDetails
 	}
 
-	uriList := nrf_context.GetNofificationUri(&nfProfiles[0])
+	uriList := nrf_context.GetNotificationUri(&nfProfiles[0])
 	nfInstanceType := nfProfiles[0].NfType
 	nfInstanceUri := nrf_context.GetNfInstanceURI(nfInstanceID)
 	// set info for NotificationData
-	Notification_event := models.NotificationEventType_DEREGISTERED
+	Notification_event := models.Nrf_NFMgmt_NotificationEventType_DEREGISTERED
 
 	for _, target := range uriList {
 		notifCtx, pd := p.getNFNotifyCtx(target)
@@ -434,7 +434,7 @@ func (p *Processor) UpdateNFInstanceProcedure(
 	}
 
 	// validate the patched NF profile
-	var patchedProfile models.NrfNfManagementNfProfile
+	var patchedProfile models.Nrf_NFMgmt_NFProfile
 	if err = json.Unmarshal(patchedJSON, &patchedProfile); err != nil {
 		return nil, &models.ProblemDetails{
 			Title:  "Malformed request syntax",
@@ -475,7 +475,7 @@ func (p *Processor) UpdateNFInstanceProcedure(
 		nf,
 	}
 
-	var nfProfiles []models.NrfNfManagementNfProfile
+	var nfProfiles []models.Nrf_NFMgmt_NFProfile
 	if err = timedecode.Decode(nfProfilesRaw, &nfProfiles); err != nil {
 		logger.NfmLog.Errorf("UpdateNFInstanceProcedure err: %+v", err)
 		return nil, &models.ProblemDetails{
@@ -495,10 +495,10 @@ func (p *Processor) UpdateNFInstanceProcedure(
 		}
 	}
 
-	uriList := nrf_context.GetNofificationUri(&nfProfiles[0])
+	uriList := nrf_context.GetNotificationUri(&nfProfiles[0])
 
 	// set info for NotificationData
-	Notification_event := models.NotificationEventType_PROFILE_CHANGED
+	Notification_event := models.Nrf_NFMgmt_NotificationEventType_PROFILE_CHANGED
 	nfInstanceUri := nrf_context.GetNfInstanceURI(nfInstanceID)
 
 	for _, target := range uriList {
@@ -565,7 +565,7 @@ func (p *Processor) GetNFInstanceProcedure(c *gin.Context, nfInstanceID string) 
 
 func (p *Processor) NFRegisterProcedure(
 	c *gin.Context,
-	nfProfile *models.NrfNfManagementNfProfile,
+	nfProfile *models.Nrf_NFMgmt_NFProfile,
 	rawProfile []byte,
 ) {
 	logger.NfmLog.Traceln("[NRF] In NFRegisterProcedure")
@@ -591,7 +591,7 @@ func (p *Processor) NFRegisterProcedure(
 		return
 	}
 
-	var nf models.NrfNfManagementNfProfile
+	var nf models.Nrf_NFMgmt_NFProfile
 
 	err := nrf_context.NnrfNFManagementDataModel(&nf, nfProfile)
 	if err != nil {
@@ -663,10 +663,10 @@ func (p *Processor) NFRegisterProcedure(
 
 	if existed {
 		logger.NfmLog.Infoln("NFRegister NfProfile Update:", nfInstanceId)
-		uriList := nrf_context.GetNofificationUri(&nf)
+		uriList := nrf_context.GetNotificationUri(&nf)
 
 		// set info for NotificationData
-		Notification_event := models.NotificationEventType_PROFILE_CHANGED
+		Notification_event := models.Nrf_NFMgmt_NotificationEventType_PROFILE_CHANGED
 		nfInstanceUri := locationHeaderValue
 
 		// receive the rsp from handler
@@ -689,9 +689,9 @@ func (p *Processor) NFRegisterProcedure(
 		return
 	} else { // Create NF Profile case
 		logger.NfmLog.Infoln("Create NF Profile:", nfInstanceId)
-		uriList := nrf_context.GetNofificationUri(&nf)
+		uriList := nrf_context.GetNotificationUri(&nf)
 		// set info for NotificationData
-		Notification_event := models.NotificationEventType_REGISTERED
+		Notification_event := models.Nrf_NFMgmt_NotificationEventType_REGISTERED
 		nfInstanceUri := locationHeaderValue
 
 		// Add NF Register Conter

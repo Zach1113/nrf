@@ -8,7 +8,7 @@ import (
 
 	"github.com/free5gc/nrf/internal/logger"
 	"github.com/free5gc/openapi/models"
-	"github.com/free5gc/openapi/nrf/NFManagement"
+	"github.com/free5gc/openapi/nrf/NFMgmt"
 	sbi_metrics "github.com/free5gc/util/metrics/sbi"
 )
 
@@ -17,10 +17,10 @@ type nnrfService struct {
 
 	nfMngmntMu sync.RWMutex
 
-	nfMngmntClients map[string]*NFManagement.APIClient
+	nfMngmntClients map[string]*NFMgmt.APIClient
 }
 
-func (s *nnrfService) getNFManagementClient(uri string) *NFManagement.APIClient {
+func (s *nnrfService) getNFManagementClient(uri string) *NFMgmt.APIClient {
 	if uri == "" {
 		return nil
 	}
@@ -31,10 +31,10 @@ func (s *nnrfService) getNFManagementClient(uri string) *NFManagement.APIClient 
 		return client
 	}
 
-	configuration := NFManagement.NewConfiguration()
+	configuration := NFMgmt.NewConfiguration()
 	configuration.SetBasePath(uri)
 	configuration.SetMetrics(sbi_metrics.SbiMetricHook)
-	client = NFManagement.NewAPIClient(configuration)
+	client = NFMgmt.NewAPIClient(configuration)
 
 	s.nfMngmntMu.RUnlock()
 	s.nfMngmntMu.Lock()
@@ -45,10 +45,10 @@ func (s *nnrfService) getNFManagementClient(uri string) *NFManagement.APIClient 
 
 func (s *nnrfService) SendNFStatusNotify(
 	ctx context.Context,
-	notification_event models.NotificationEventType,
+	notification_event models.Nrf_NFMgmt_NotificationEventType,
 	nfInstanceUri string,
 	url string,
-	nfProfile *models.NrfNfManagementNfProfile,
+	nfProfile *models.Nrf_NFMgmt_NFProfile,
 ) *models.ProblemDetails {
 	logger.ConsumerLog.Infoln("SendNFStatusNotify")
 
@@ -63,7 +63,7 @@ func (s *nnrfService) SendNFStatusNotify(
 	s.nfMngmntMu.RLock()
 	defer s.nfMngmntMu.RUnlock()
 
-	notifcationData := models.NrfNfManagementNotificationData{
+	notifcationData := models.Nrf_NFMgmt_NotificationData{
 		Event:         notification_event,
 		NfInstanceUri: nfInstanceUri,
 	}
@@ -71,12 +71,12 @@ func (s *nnrfService) SendNFStatusNotify(
 		notifcationData.NfProfile = nfProfile
 	}
 
-	request := &NFManagement.CreateSubscriptionOnNFStatusEventPostRequest{
-		NrfNfManagementNotificationData: &notifcationData,
+	request := &NFMgmt.CreateSubscriptionOnNFStatusEventRequest{
+		RequestBody: &notifcationData,
 	}
 
-	_, err := client.SubscriptionsCollectionApi.CreateSubscriptionOnNFStatusEventPost(
-		ctx, nfInstanceUri, request)
+	_, err := client.SubscriptionsCollectionApi.CreateSubscriptionOnNFStatusEvent(
+		ctx, url, request)
 	if err != nil {
 		logger.NfmLog.Infof("Notify fail: %v", err)
 		problemDetails := &models.ProblemDetails{

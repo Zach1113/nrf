@@ -153,7 +153,7 @@ func (p *Processor) NFDiscoveryProcedure(c *gin.Context, queryParameters url.Val
 	}
 
 	// nfProfile data for response
-	var nfProfilesStruct []models.NrfNfDiscoveryNfProfile
+	var nfProfilesStruct []models.Nrf_NFDisc_NFProfile
 	if err = timedecode.Decode(nfProfilesRaw, &nfProfilesStruct); err != nil {
 		logger.DiscLog.Errorf("NF Profile Raw decode error: %+v", err)
 		problemDetails := &models.ProblemDetails{
@@ -200,7 +200,7 @@ func (p *Processor) NFDiscoveryProcedure(c *gin.Context, queryParameters url.Val
 	}
 	validityPeriod := 100
 	// Build SearchResult model
-	searchResult := &models.SearchResult{
+	searchResult := &models.Nrf_NFDisc_SearchResult{
 		ValidityPeriod: int32(validityPeriod),
 		NfInstances:    nfProfilesStruct,
 	}

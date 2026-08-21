@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -55,7 +56,7 @@ func (s *Server) HTTPAccessTokenRequest(c *gin.Context) {
 		return
 	}
 
-	var accessTokenReq models.NrfAccessTokenAccessTokenReq
+	var accessTokenReq models.Nrf_AccTok_AccessTokenReq
 
 	// Request parser
 	err := c.Request.ParseForm()
@@ -74,7 +75,9 @@ func (s *Server) HTTPAccessTokenRequest(c *gin.Context) {
 	for key, value := range c.Request.PostForm {
 		fieldIdx := -1
 		for i := 0; i < rt.NumField(); i++ {
-			if tag := rt.Field(i).Tag.Get("yaml"); tag == key {
+			tag := rt.Field(i).Tag.Get("yaml")
+			tagName, _, _ := strings.Cut(tag, ",")
+			if tagName == key {
 				fieldIdx = i
 				break
 			}

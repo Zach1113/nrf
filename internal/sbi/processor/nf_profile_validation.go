@@ -18,7 +18,7 @@ const (
 )
 
 // validateNfProfileJSON validates raw JSON fields before checking the decoded profile.
-func validateNfProfileJSON(raw []byte, nfProfile *models.NrfNfManagementNfProfile) error {
+func validateNfProfileJSON(raw []byte, nfProfile *models.Nrf_NFMgmt_NFProfile) error {
 	var fields map[string]json.RawMessage
 	if err := json.Unmarshal(raw, &fields); err != nil {
 		return fmt.Errorf("invalid NF profile JSON: %w", err)
@@ -41,7 +41,7 @@ func validateNfProfileJSON(raw []byte, nfProfile *models.NrfNfManagementNfProfil
 }
 
 // validateNfProfile validates semantic constraints on a decoded NF profile.
-func validateNfProfile(nfProfile *models.NrfNfManagementNfProfile) error {
+func validateNfProfile(nfProfile *models.Nrf_NFMgmt_NFProfile) error {
 	if nfProfile == nil {
 		return fmt.Errorf("NF profile is required")
 	}
@@ -99,8 +99,8 @@ func validateNfInstanceID(nfInstanceID string) error {
 }
 
 // validateIPEndPoint validates service endpoint transport, port, and address format.
-func validateIPEndPoint(endpoint models.IpEndPoint) error {
-	if endpoint.Transport != "" && endpoint.Transport != models.NrfNfManagementTransportProtocol_TCP {
+func validateIPEndPoint(endpoint models.Nrf_NFMgmt_IpEndPoint) error {
+	if endpoint.Transport != "" && endpoint.Transport != models.Nrf_NFMgmt_TransportProtocol_TCP {
 		return fmt.Errorf("transport must be TCP")
 	}
 	if endpoint.Port != 0 && (endpoint.Port < 1 || endpoint.Port > maxTCPPort) {
@@ -191,11 +191,11 @@ func validIPv6(address string) bool {
 }
 
 // validNfStatus checks allowed NF status enum values.
-func validNfStatus(status models.NrfNfManagementNfStatus) bool {
+func validNfStatus(status models.Nrf_NFMgmt_NFStatus) bool {
 	switch status {
-	case models.NrfNfManagementNfStatus_REGISTERED,
-		models.NrfNfManagementNfStatus_SUSPENDED,
-		models.NrfNfManagementNfStatus_UNDISCOVERABLE:
+	case models.Nrf_NFMgmt_NFStatus_REGISTERED,
+		models.Nrf_NFMgmt_NFStatus_SUSPENDED,
+		models.Nrf_NFMgmt_NFStatus_UNDISCOVERABLE:
 		return true
 	default:
 		return false
@@ -203,11 +203,11 @@ func validNfStatus(status models.NrfNfManagementNfStatus) bool {
 }
 
 // validNfServiceStatus checks allowed NF service status enum values.
-func validNfServiceStatus(status models.NfServiceStatus) bool {
+func validNfServiceStatus(status models.Nrf_NFMgmt_NFServiceStatus) bool {
 	switch status {
-	case models.NfServiceStatus_REGISTERED,
-		models.NfServiceStatus_SUSPENDED,
-		models.NfServiceStatus_UNDISCOVERABLE:
+	case models.Nrf_NFMgmt_NFServiceStatus_REGISTERED,
+		models.Nrf_NFMgmt_NFServiceStatus_SUSPENDED,
+		models.Nrf_NFMgmt_NFServiceStatus_UNDISCOVERABLE:
 		return true
 	default:
 		return false
@@ -225,64 +225,64 @@ func validURIScheme(scheme models.UriScheme) bool {
 }
 
 // validNfType checks allowed NF type enum values.
-func validNfType(nfType models.NrfNfManagementNfType) bool {
+func validNfType(nfType models.Nrf_NFMgmt_NFType) bool {
 	switch nfType {
-	case models.NrfNfManagementNfType_NRF,
-		models.NrfNfManagementNfType_UDM,
-		models.NrfNfManagementNfType_AMF,
-		models.NrfNfManagementNfType_SMF,
-		models.NrfNfManagementNfType_AUSF,
-		models.NrfNfManagementNfType_NEF,
-		models.NrfNfManagementNfType_PCF,
-		models.NrfNfManagementNfType_SMSF,
-		models.NrfNfManagementNfType_NSSF,
-		models.NrfNfManagementNfType_UDR,
-		models.NrfNfManagementNfType_LMF,
-		models.NrfNfManagementNfType_GMLC,
-		models.NrfNfManagementNfType__5_G_EIR,
-		models.NrfNfManagementNfType_SEPP,
-		models.NrfNfManagementNfType_UPF,
-		models.NrfNfManagementNfType_N3_IWF,
-		models.NrfNfManagementNfType_AF,
-		models.NrfNfManagementNfType_UDSF,
-		models.NrfNfManagementNfType_BSF,
-		models.NrfNfManagementNfType_CHF,
-		models.NrfNfManagementNfType_NWDAF,
-		models.NrfNfManagementNfType_PCSCF,
-		models.NrfNfManagementNfType_CBCF,
-		models.NrfNfManagementNfType_HSS,
-		models.NrfNfManagementNfType_UCMF,
-		models.NrfNfManagementNfType_SOR_AF,
-		models.NrfNfManagementNfType_SPAF,
-		models.NrfNfManagementNfType_MME,
-		models.NrfNfManagementNfType_SCSAS,
-		models.NrfNfManagementNfType_SCEF,
-		models.NrfNfManagementNfType_SCP,
-		models.NrfNfManagementNfType_NSSAAF,
-		models.NrfNfManagementNfType_ICSCF,
-		models.NrfNfManagementNfType_SCSCF,
-		models.NrfNfManagementNfType_DRA,
-		models.NrfNfManagementNfType_IMS_AS,
-		models.NrfNfManagementNfType_AANF,
-		models.NrfNfManagementNfType__5_G_DDNMF,
-		models.NrfNfManagementNfType_NSACF,
-		models.NrfNfManagementNfType_MFAF,
-		models.NrfNfManagementNfType_EASDF,
-		models.NrfNfManagementNfType_DCCF,
-		models.NrfNfManagementNfType_MB_SMF,
-		models.NrfNfManagementNfType_TSCTSF,
-		models.NrfNfManagementNfType_ADRF,
-		models.NrfNfManagementNfType_GBA_BSF,
-		models.NrfNfManagementNfType_CEF,
-		models.NrfNfManagementNfType_MB_UPF,
-		models.NrfNfManagementNfType_NSWOF,
-		models.NrfNfManagementNfType_PKMF,
-		models.NrfNfManagementNfType_MNPF,
-		models.NrfNfManagementNfType_SMS_GMSC,
-		models.NrfNfManagementNfType_SMS_IWMSC,
-		models.NrfNfManagementNfType_MBSF,
-		models.NrfNfManagementNfType_MBSTF,
-		models.NrfNfManagementNfType_PANF:
+	case models.Nrf_NFMgmt_NFType_NRF,
+		models.Nrf_NFMgmt_NFType_UDM,
+		models.Nrf_NFMgmt_NFType_AMF,
+		models.Nrf_NFMgmt_NFType_SMF,
+		models.Nrf_NFMgmt_NFType_AUSF,
+		models.Nrf_NFMgmt_NFType_NEF,
+		models.Nrf_NFMgmt_NFType_PCF,
+		models.Nrf_NFMgmt_NFType_SMSF,
+		models.Nrf_NFMgmt_NFType_NSSF,
+		models.Nrf_NFMgmt_NFType_UDR,
+		models.Nrf_NFMgmt_NFType_LMF,
+		models.Nrf_NFMgmt_NFType_GMLC,
+		models.Nrf_NFMgmt_NFType_5_G_EIR,
+		models.Nrf_NFMgmt_NFType_SEPP,
+		models.Nrf_NFMgmt_NFType_UPF,
+		models.Nrf_NFMgmt_NFType_N3_IWF,
+		models.Nrf_NFMgmt_NFType_AF,
+		models.Nrf_NFMgmt_NFType_UDSF,
+		models.Nrf_NFMgmt_NFType_BSF,
+		models.Nrf_NFMgmt_NFType_CHF,
+		models.Nrf_NFMgmt_NFType_NWDAF,
+		models.Nrf_NFMgmt_NFType_PCSCF,
+		models.Nrf_NFMgmt_NFType_CBCF,
+		models.Nrf_NFMgmt_NFType_HSS,
+		models.Nrf_NFMgmt_NFType_UCMF,
+		models.Nrf_NFMgmt_NFType_SOR_AF,
+		models.Nrf_NFMgmt_NFType_SPAF,
+		models.Nrf_NFMgmt_NFType_MME,
+		models.Nrf_NFMgmt_NFType_SCSAS,
+		models.Nrf_NFMgmt_NFType_SCEF,
+		models.Nrf_NFMgmt_NFType_SCP,
+		models.Nrf_NFMgmt_NFType_NSSAAF,
+		models.Nrf_NFMgmt_NFType_ICSCF,
+		models.Nrf_NFMgmt_NFType_SCSCF,
+		models.Nrf_NFMgmt_NFType_DRA,
+		models.Nrf_NFMgmt_NFType_IMS_AS,
+		models.Nrf_NFMgmt_NFType_AANF,
+		models.Nrf_NFMgmt_NFType_5_G_DDNMF,
+		models.Nrf_NFMgmt_NFType_NSACF,
+		models.Nrf_NFMgmt_NFType_MFAF,
+		models.Nrf_NFMgmt_NFType_EASDF,
+		models.Nrf_NFMgmt_NFType_DCCF,
+		models.Nrf_NFMgmt_NFType_MB_SMF,
+		models.Nrf_NFMgmt_NFType_TSCTSF,
+		models.Nrf_NFMgmt_NFType_ADRF,
+		models.Nrf_NFMgmt_NFType_GBA_BSF,
+		models.Nrf_NFMgmt_NFType_CEF,
+		models.Nrf_NFMgmt_NFType_MB_UPF,
+		models.Nrf_NFMgmt_NFType_NSWOF,
+		models.Nrf_NFMgmt_NFType_PKMF,
+		models.Nrf_NFMgmt_NFType_MNPF,
+		models.Nrf_NFMgmt_NFType_SMS_GMSC,
+		models.Nrf_NFMgmt_NFType_SMS_IWMSC,
+		models.Nrf_NFMgmt_NFType_MBSF,
+		models.Nrf_NFMgmt_NFType_MBSTF,
+		models.Nrf_NFMgmt_NFType_PANF:
 		return true
 	default:
 		return false

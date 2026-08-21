@@ -132,7 +132,7 @@ func (s *Server) HTTPGetNFInstance(c *gin.Context) {
 // RegisterNFInstance - Register a new NF Instance
 func (s *Server) HTTPRegisterNFInstance(c *gin.Context) {
 	// // step 1: retrieve http request body
-	var nfprofile models.NrfNfManagementNfProfile
+	var nfprofile models.Nrf_NFMgmt_NFProfile
 
 	requestBody, err := c.GetRawData()
 	if err != nil {
@@ -295,7 +295,7 @@ func (s *Server) HTTPUpdateSubscription(c *gin.Context) {
 
 // CreateSubscription - Create a new subscription
 func (s *Server) HTTPCreateSubscription(c *gin.Context) {
-	var subscription models.NrfNfManagementSubscriptionData
+	var subscription models.Nrf_NFMgmt_SubscriptionData
 
 	// step 1: retrieve http request body
 	requestBody, err := c.GetRawData()
@@ -329,9 +329,9 @@ func (s *Server) HTTPCreateSubscription(c *gin.Context) {
 	s.Processor().HandleCreateSubscriptionRequest(c, subscription)
 }
 
-// DecodeNfProfile - Only support []map[string]interface to []models.NfProfile
-func (s *Server) DecodeNfProfile(source interface{}, format string) (models.NrfNfManagementNfProfile, error) {
-	var target models.NrfNfManagementNfProfile
+// DecodeNfProfile - Only support []map[string]interface to []models.Nrf_NFMgmt_NFProfile
+func (s *Server) DecodeNfProfile(source interface{}, format string) (models.Nrf_NFMgmt_NFProfile, error) {
+	var target models.Nrf_NFMgmt_NFProfile
 
 	// config mapstruct
 	stringToDateTimeHook := func(

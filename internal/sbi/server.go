@@ -117,7 +117,7 @@ func (s *Server) applyService() {
 
 	discoveryRoutes := s.getNfDiscoveryRoutes()
 	discoveryGroup := s.router.Group(factory.NrfDiscResUriPrefix)
-	discAuthCheck := util.NewRouterAuthorizationCheck(models.ServiceName_NNRF_DISC)
+	discAuthCheck := util.NewRouterAuthorizationCheck(models.Nrf_NFMgmt_ServiceName_NNRF_DISC)
 	discoveryGroup.Use(func(c *gin.Context) {
 		discAuthCheck.Check(c, s.Context())
 	})
@@ -130,7 +130,7 @@ func (s *Server) applyService() {
 
 	managementRoutes := s.getNfManagementRoute()
 	managementGroup := s.router.Group(factory.NrfNfmResUriPrefix)
-	managementAuthCheck := util.NewRouterAuthorizationCheck(models.ServiceName_NNRF_NFM)
+	managementAuthCheck := util.NewRouterAuthorizationCheck(models.Nrf_NFMgmt_ServiceName_NNRF_NFM)
 	managementGroup.Use(func(c *gin.Context) {
 		managementAuthCheck.Check(c, s.Context())
 	})
