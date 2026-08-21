@@ -553,20 +553,25 @@ func buildFilter(queryParameters url.Values) (bson.M, error) {
 				logger.DiscLog.Warnln("Unmarshal Error in guamiStruct: ", err)
 			}
 
-			guamiByteArray, err := bson.Marshal(guamiStruct)
-			if err != nil {
-				logger.DiscLog.Warnln("Unmarshal Error in guamiByteArray: ", err)
+			// Match amfId/plmnId as individual dot-path field conditions instead of a
+			// whole-embedded-document equality check on plmnId. A whole-document equality
+			// match in MongoDB requires the query's field order to exactly match the stored
+			// document's field order; the stored amfInfo.guamiList[].plmnId subdocument's
+			// field order isn't guaranteed to be consistent, since the NF profile is
+			// serialized through a map (bson.M) before being inserted, and Go's map
+			// iteration order is randomized. Per-field dot-path conditions make the match
+			// order-independent.
+			elemMatchCond := bson.M{
+				"amfId": guamiStruct.AmfId,
 			}
-
-			guamiBsonM := bson.M{}
-			err = bson.Unmarshal(guamiByteArray, &guamiBsonM)
-			if err != nil {
-				logger.DiscLog.Warnln("Unmarshal Error in guamiByteArray: ", err)
+			if guamiStruct.PlmnId != nil {
+				elemMatchCond["plmnId.mcc"] = guamiStruct.PlmnId.Mcc
+				elemMatchCond["plmnId.mnc"] = guamiStruct.PlmnId.Mnc
 			}
 
 			guamiFilter := bson.M{
 				"amfInfo.guamiList": bson.M{
-					"$elemMatch": guamiBsonM,
+					"$elemMatch": elemMatchCond,
 				},
 			}
 
