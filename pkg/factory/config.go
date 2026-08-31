@@ -83,10 +83,9 @@ type Logger struct {
 }
 
 func (c *Configuration) validate() (bool, error) {
-	if c.NfInstanceId == "" {
-		if c.Sbi != nil && c.Sbi.OAuth {
-			return false, govalidator.Errors{errors.New("nfInstanceId is required when OAuth is enabled")}
-		}
+	// OAuth-enabled NRF identity is resolved during context initialization so
+	// it can be recovered from an existing NRF certificate URI SAN.
+	if c.NfInstanceId == "" && (c.Sbi == nil || !c.Sbi.OAuth) {
 		c.NfInstanceId = uuid.New().String()
 	}
 
@@ -149,7 +148,8 @@ func (c *Config) GetNfInstanceId() string {
 		return c.Configuration.NfInstanceId
 	}
 
-	if err := uuid.Validate(nfInstanceId); err != nil {
+	id, err := uuid.Parse(nfInstanceId)
+	if err != nil || id.Version() != 4 {
 		logger.CfgLog.Errorf("Env var \"%s\" is not a valid uuid, "+
 			"fallback on configuration nfInstanceId : %s", NrfDefaultNfInstanceIdEnvVar, c.Configuration.NfInstanceId)
 		return c.Configuration.NfInstanceId
